@@ -8,6 +8,11 @@ Backend API for an IT support ticketing system built with:
 
 ## Getting Started
 
+### How to run the backend
 cd backend
-npm install
+npm run dev
+
+
+### How to run the frontend
+cd frontend
 npm run dev
