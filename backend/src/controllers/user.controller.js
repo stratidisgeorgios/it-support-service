@@ -1,5 +1,9 @@
 import {User} from "../models/user.model.js";
-
+import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
+dotenv.config({
+    path: '../../.env'
+})
 const registerUser = async (req,res) => {
     try{
         const {username,email,password} = req.body;
@@ -18,10 +22,8 @@ const registerUser = async (req,res) => {
         const user = await User.create({
             username,
             email:email.toLowerCase(),
-            password,
+            password
         })
-        console.log("whatisup")
-
         res.status(201).json({
             message:"User registered",
             user:{id:user._id,email:user.email,username:user.username}
@@ -49,8 +51,12 @@ const loginUser = async(req,res)=>{
             return res.status(400).json({message:"Password is not correct"})
 
         }
-
-        res.status(200).json({message:"Successfully logged in",user:{id:user._id,email:user.email,username:user.username}})
+        const payload = {
+            email:email,
+            roles:user.roles
+        }
+        const accessToken = jwt.sign(payload,process.env.JWT_SECRET,{expiresIn:"1h"})
+        res.status(200).json({message:"Successfully logged in",user:{id:user._id,email:user.email,username:user.username,roles:user.roles},accessToken})
 
     }catch(error){
         res.status(500).json({
@@ -74,9 +80,37 @@ const logoutUser = async(req,res)=>{
     }
 }
 
+const getAllUsers= async(req,res)=>{
+    
+    try{
+        const users= await User.find()
+    
+        if(!users){
+            return res.status(400).json({message:"Database has no users."})
+        }
+    
+        res.status(200).json({message:"All users sent",users})
+    }catch(error){
+        res.status(500).json({message:"Internal Server Error",error})
+    }
+}
+
+
+const deleteUser = async()=>{
+    const username = req.body
+    const user = await User.findOneAndDelete({username:username})
+    if(!user){
+        return res.status(400).json({message:'User not found'})
+    }
+    res.status(200).json({message:"User deleted"},user)
+
+}
+
 export {
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    getAllUsers,
+    deleteUser
     
 }

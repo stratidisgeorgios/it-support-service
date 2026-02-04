@@ -23,6 +23,11 @@ const userSchema = new Schema(
             unique:true,
             lowercase:true,
             trim:true
+        },
+        roles:{
+            type:[String],
+            enum:["User","Admin","Editor"],
+            default:["Admin"]
         }
     },
     {
